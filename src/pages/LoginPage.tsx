@@ -3,7 +3,7 @@ import ComingSoon from "@/components/coming_soon"
 
 function Login() {
   return (
-    <div>
+    <div className="h-screen">
         <ComingSoon />
     </div>
   )

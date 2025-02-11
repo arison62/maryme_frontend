@@ -84,7 +84,9 @@ function HomePage() {
             <div
               className={`${
                 isMenuOpen ? "flex" : "hidden"
+
               } flex-col gap-4 absolute min-w-[300px] top-12 right-0 bg-white p-4 rounded-md shadow-lg`}
+
             >
               <span>Informations Generales</span>
               <Link to="/login">Se connecter</Link>

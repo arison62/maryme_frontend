@@ -75,7 +75,7 @@
 @layer utilities {
   .mask {
     background-color: rgb(1, 167, 1);
-    mask-image: url(Map.svg);
+    mask-image: url(/Map.svg);
     mask-repeat: no-repeat;
     mask-position: center;
     background-repeat: no-repeat;

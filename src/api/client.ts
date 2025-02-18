@@ -64,7 +64,6 @@ export async function post<T, D=any>(
         });
         return handleResponse<T>(response);
     } catch (error: any) {
-        console.log(error)
         return handleFetchError<T>(error)
     }
 }
@@ -125,8 +124,9 @@ async function handleResponse<T>(response: Response): Promise<APIResponse<T>> {
             message : null
         }
     }else {
+        
         return {
-            data: {} as T,
+            data: data as T,
             status: response.status,
             message: data.message
         }

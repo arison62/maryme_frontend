@@ -7,42 +7,20 @@ import {
 } from "@/components/ui/input-otp";
 import CircularProgressIndicator from "./ui/circular-progress-indicator";
 import { post } from "@/api/client";
+import Stepper from "./stepper";
 
 function CheckOTP() {
   const [isProgess, setIsProgess] = useState(false);
   const [isFirstRender, setFirstRender] = useState(true)
   const [otp, setOtp] = useState<string | null>(null)
-  const [data, setData]= useState(undefined)
+  const [, setData]= useState(undefined)
 
-  useEffect(()=>{
-    
 
-    (async function(){
-      if(!isFirstRender){
-        setIsProgess(true);
-        const result = await post<{
-          error: string | boolean,
-          data: any
-        }>("/auth/user/token", {
-          email:"legrandpone1@gmail.com",
-          otp: otp
-        })
-        console.log(result)
-        setData(result)
-        setIsProgess(false)
-      }else{
-        setFirstRender(false)
-      }
-        
-    })()
-   
-  },[otp])
-  console.log(isProgess)
   return (
     <div className="relative flex min-w-full
-    items-center justify-center h-full
+    items-center flex-col justify-center gap-8 h-full
     ">
-      
+      <Stepper elements={["Email", "Personnelle"]} activeIndex={13} />
       <div>
         <InputOTP maxLength={6} onComplete={(otp) => setOtp(otp)} disabled={isProgess}>
           <InputOTPGroup>

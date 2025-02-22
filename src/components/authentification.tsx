@@ -3,8 +3,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import CircularProgressIndicator from "./ui/circular-progress-indicator";
-import { FormEvent, useEffect, useState} from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import { post } from "@/api/client";
+import { TapContext } from "@/pages/DeclarationPage";
 
 type Data = {
   error: boolean | string | undefined;
@@ -12,55 +13,59 @@ type Data = {
 };
 
 function Authentification({
+  key,
   index,
   className,
-  onSubmit,
+
 }: {
+  key?: React.Key;
   index: number;
   className?: string;
-  onSubmit: (value?: unknown) => void;
 }) {
-
   const [isProgress, setIsProgess] = useState(false);
-  const [email, setEmail] = useState<string>("")
-  const [error, setError] = useState<string | undefined>(undefined);
-
+  const [email, setEmail] = useState<string>("");
+  const [error, setError] = useState<string | undefined>();
+  const {setActiveTap} = useContext(TapContext);
 
   useEffect(() => {
-
-    if(isProgress){
-    setIsProgess(true)
-    async function sendOtp() {
+    if (isProgress) {
+      setIsProgess(true);
+      async function sendOtp() {
         const data = await post<Data>("/user/auth/token", {
-            email: email
+          email: email,
         });
-        if (typeof data.data.error == "boolean" && data.data.error == false) {
-          onSubmit(index);
-        } else if (data.data.error == "INVALID EMAIL") {
+        if (
+          (typeof data.error == "boolean" && data.error == false) ||
+          data.error == undefined
+        ) {
+          localStorage.setItem("userEmail", email);
+          setActiveTap(index + 1);
+        } else if (data.error == "INVALID EMAIL") {
           setError(
             "Votr adresse electronique n'est pas valide verifier l'orthographe"
           );
-        } else if (data.data.error == "INTERNAL ERROR") {
+        } else if (data.error == "INTERNAL ERROR") {
           setError("Erreur du serveur ressayer plustart");
         } else {
-            console.log(data)
-          setError("Oups quelque chose a mal fonctionne");
+          setError(data.message)
         }
-  
-        setIsProgess(false)
-      }
-      sendOtp()
-    }
-    
-  }, [index, isProgress, onSubmit]);
 
-  function onSubmitHandler(event : FormEvent){
-    event.preventDefault()
-    setIsProgess(true)
+        setIsProgess(false);
+      }
+      sendOtp();
+    }
+  }, [isProgress]);
+
+  function onSubmitHandler(event: FormEvent) {
+    event.preventDefault();
+    const formData = new FormData(event.target as HTMLFormElement);
+    const email = formData.get("email") as string;
+    setEmail(email.trim());
+    setIsProgess(true);
   }
   return (
-    <div className={clsx(className)}>
-      <h1 className="text-2xl font-bold text-green-950">Authentification</h1>
+    <div key={key} className={clsx(className)}>
+      <h2 className="text-2xl font-bold text-green-950">Authentification</h2>
       <p className="text-slate-500 mt-2">
         Accedez au portail de declaration de mariage
       </p>
@@ -70,8 +75,6 @@ function Authentification({
           id="email"
           name="email"
           type="email"
-          value={email}
-          onChange={(e)=> setEmail(e.target.value)}
           placeholder="jeanmarie@gamil.com"
           required={true}
           disabled={isProgress}

@@ -6,6 +6,9 @@ const API_CONFIG = {
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+  
+    
+  
   },
 };
 
@@ -46,7 +49,9 @@ export async function get<T>(
     }
     const response = await fetch(fullUrl.toString(), {
       method: "GET",
+      credentials: "include",
       headers: getHeaders(),
+    
     });
     return handleResponse<T>(response);
   } catch (error: any) {
@@ -63,6 +68,7 @@ export async function post<T, D = any>(
     const response = await fetch(buildUrl(path), {
       method: "POST",
       headers: getHeaders(),
+     
       body: data ? JSON.stringify(data) : undefined,
     });
     return handleResponse<T>(response);
@@ -79,6 +85,7 @@ export async function put<T, D = any>(
     const response = await fetch(buildUrl(path), {
       method: "PUT",
       headers: getHeaders(),
+     
       body: data ? JSON.stringify(data) : undefined,
     });
     return handleFetchError<T>(response);
@@ -95,6 +102,7 @@ export async function del<T, D = any>(
     const response = await fetch(buildUrl(path), {
       method: "DELETE",
       headers: getHeaders(),
+    
       body: data ? JSON.stringify(data) : undefined,
     });
     return handleFetchError<T>(response);

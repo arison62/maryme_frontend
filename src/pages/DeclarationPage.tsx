@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 
 const TapContext = React.createContext({
   activeTap: 0,
-  setActiveTap: (value: number) => {},
+  setActiveTap: (value: number) => {
+    console.log("value", value);
+  },
 });
 
 const tabs = [

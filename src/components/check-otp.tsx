@@ -9,6 +9,7 @@ import CircularProgressIndicator from "./ui/circular-progress-indicator";
 import { post } from "@/api/client";
 import clsx from "clsx";
 import { TapContext } from "@/pages/DeclarationPage";
+import { Button } from "@/components/ui/button";
 
 function CheckOTP({
   key,
@@ -23,7 +24,6 @@ function CheckOTP({
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [otp, setOtp] = useState("");
   const { setActiveTap } = React.useContext(TapContext);
-
 
   useEffect(() => {
     async function checkOpt() {
@@ -100,6 +100,16 @@ function CheckOTP({
             <InputOTPSlot index={5} />
           </InputOTPGroup>
         </InputOTP>
+      </div>
+      <div className="w-full">
+        <Button
+          variant={"secondary"}
+          onClick={() => {
+            setActiveTap(index - 1);
+          }}
+        >
+          Retour
+        </Button>
       </div>
       {errorMessage && <p className="text-red-600">{errorMessage}</p>}
       {isProgess && (

@@ -4,8 +4,9 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
 import logoImg from "../assets/logo.png";
 import CheckOTP from "@/components/check-otp";
-import { DeclarationConjointProvider } from "@/components/declaration_form/declaration_context";
-import ConjointForm from "@/components/declaration_form/conjointForm";
+import { DeclarationProvider } from "@/components/declaration_form/declaration_provider";
+import ConjointForm from "@/components/declaration_form/conjoint_form";
+import MariageForm from "@/components/declaration_form/mariage_form";
 
 const TapContext = React.createContext({
   activeTap: 0,
@@ -23,18 +24,23 @@ const tabs = [
     name: "Verification",
     component: <CheckOTP index={1} className="max-w-xl w-full mt-8" />,
   },
+
   {
     name: "Informations des mariés",
     component: <ConjointForm index={2} className="w-full mt-8" />,
   },
+  {
+    name: "Informatio sur le Celebrant",
+    component: <MariageForm index={3} className="w-full mt-8"/>
+  },
 ];
 function DeclarationPage() {
-  const [activeTap, setTap] = useState(0);
+  const [activeTap, setTap] = useState(3);
 
   const tabNames = useMemo(() => tabs.map((tab) => tab.name), []);
   console.log("activeTap", activeTap);
   return (
-    <DeclarationConjointProvider>
+    <DeclarationProvider>
       <TapContext.Provider
         value={{
           activeTap,
@@ -67,7 +73,7 @@ function DeclarationPage() {
           </div>
         </div>
       </TapContext.Provider>
-    </DeclarationConjointProvider>
+    </DeclarationProvider>
   );
 }
 

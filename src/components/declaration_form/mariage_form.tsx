@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DeclarationConjointContext, Epouse, Epoux } from "./declaration_context";
+import { DeclarationCelebrantContext, DeclarationMariageContext} from "./declaration_provider";
 import { FormEvent, useContext } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -19,39 +19,38 @@ import {
 import clsx from "clsx";
 import { TapContext } from "@/pages/DeclarationPage";
 
+
+
 const formSchema = z.object({
-  nomEpoux: z.string().nonempty(),
-  prenomEpoux: z.string().optional(),
-  date_naissanceEpoux: z.string().min(8).max(10),
-  telephoneEpoux: z.string().nonempty().min(6).max(12),
-  nomEpouse: z.string().nonempty(),
-  prenomEpouse: z.string().optional(),
-  date_naissanceEpouse: z.string().min(8).max(10),
-  telephoneEpouse: z.string().nonempty().min(6).max(12),
+  nomCelebrant: z.string().nonempty(),
+  prenomCelebrant: z.string().optional(),
+  date_naissanceCelebrant: z.string().min(8).max(10),
+  telephoneCelebrant: z.string().nonempty().min(6).max(12),
+  date_mariage: z.string().min(8).max(10),
+  id_commune: z.number()
 });
 
-function ConjointForm({
+function MariageForm({
         index,
         className
 }:{index: number, className: string}) {
-  const { epouse, epoux, setEpouse, setEpoux } = useContext(
-    DeclarationConjointContext
-  );
+  const {celebrant, setCelebrant} = useContext(DeclarationCelebrantContext);
+  const {mariage, setMariage} = useContext(DeclarationMariageContext);
+
 
   const {setActiveTap} = useContext(TapContext)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nomEpoux: epoux.nomEpoux,
-      prenomEpoux: epoux.prenomEpoux,
-      date_naissanceEpoux: epoux.date_naissanceEpoux,
-      telephoneEpoux: epoux.telephoneEpoux,
-      nomEpouse: epouse.nomEpouse,
-      prenomEpouse: epouse.prenomEpouse,
-      date_naissanceEpouse: epouse.date_naissanceEpouse,
-      telephoneEpouse: epouse.telephoneEpouse,
+      nomCelebrant: celebrant.nom,
+      prenomCelebrant: celebrant.prenom,
+      date_naissanceCelebrant: celebrant.date_naissance,
+      telephoneCelebrant: celebrant.telephone,
+      date_mariage: mariage.date_mariage,
+      id_commune: mariage.id_commune
     },
+      
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -61,22 +60,21 @@ function ConjointForm({
 
   function onChange(event : FormEvent<HTMLFormElement>){
     const formData = new FormData(event.currentTarget);
-    const epoux : Epoux = {
-        nomEpoux: formData.get('nomEpoux')?.toString() || "",
-        prenomEpoux: formData.get('prenomEpoux')?.toString() || "",
-        date_naissanceEpoux:  formData.get("date_naissanceEpoux")?.toString() || "",
-        telephoneEpoux: formData.get("telephoneEpoux")?.toString() || ""
-    }
-
-    const epouse : Epouse = {
-        nomEpouse: formData.get('nomEpouse')?.toString() || "",
-        prenomEpouse: formData.get('prenomEpouse')?.toString() || "",
-        date_naissanceEpouse:  formData.get("date_naissanceEpouse")?.toString() || "",
-        telephoneEpouse: formData.get("telephoneEpoux")?.toString() || ""
-    }
-
-    setEpouse(epouse)
-    setEpoux(epoux)
+    const nomCelebrant = formData.get("nomCelebrant") as string;
+    const prenomCelebrant = formData.get("prenomCelebrant") as string;
+    const telephoneCelebrant = formData.get("telephoneCelebrant") as string;
+    const date_mariage = formData.get("date_mariage") as string;
+    setCelebrant({
+      nom: nomCelebrant,
+      prenom: prenomCelebrant,
+      telephone: telephoneCelebrant,
+      date_naissance: ""
+    });
+    setMariage({
+      date_mariage: date_mariage,
+      lieu_mariage: "",
+      id_commune: 0
+    });
   }
 
   return (
@@ -89,20 +87,20 @@ function ConjointForm({
         >
           <div>
             <h2 className="text-xl font-bold text-green-800 mb-4">
-              Informations sur l'epoux
+              Informations sur le mariage
             </h2>
             <div className="flex flex-col md:flex-row md:gap-4">
               <FormField
                 control={form.control}
-                name="nomEpoux"
+                name="date_mariage"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Nom de l'époux</FormLabel>
+                    <FormLabel>Date mariage</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} type="date"/>
                     </FormControl>
                     <FormDescription>
-                      Veuillez entrer le nom de l'époux
+                      Veuillez entrer la date du mariage
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -110,15 +108,15 @@ function ConjointForm({
               ></FormField>
               <FormField
                 control={form.control}
-                name="prenomEpoux"
+                name="nomCelebrant"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Prenom de l'époux</FormLabel>
+                    <FormLabel>Nom du celebrant</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      Veuillez entrer le prenom de l'époux
+                      Veuillez entrer le nom du celebrant
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -128,15 +126,15 @@ function ConjointForm({
             <div className="flex flex-col md:flex-row gap-4">
               <FormField
                 control={form.control}
-                name="date_naissanceEpoux"
+                name="prenomCelebrant"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Date naissance Epoux</FormLabel>
+                    <FormLabel>Prenom celebrant</FormLabel>
                     <FormControl>
-                      <Input {...field} type="date" />
+                      <Input {...field}  />
                     </FormControl>
                     <FormDescription>
-                      Veuillez entrer la date de naissance
+                      Veuillez entrez le prenom du celebrant
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -144,7 +142,7 @@ function ConjointForm({
               ></FormField>
               <FormField
                 control={form.control}
-                name="telephoneEpoux"
+                name="telephoneCelebrant"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
                     <FormLabel>Numero de telephone </FormLabel>
@@ -160,7 +158,7 @@ function ConjointForm({
               ></FormField>
             </div>
           </div>
-          <div>
+          {/* <div>
             <h2 className="text-xl font-bold text-green-800 mb-4">
               Informations sur l'epouse
             </h2>
@@ -232,9 +230,15 @@ function ConjointForm({
                 )}
               ></FormField>
             </div>
-          </div>
-          <div className="flex justify-end">
-            <Button type="submit">Next</Button>
+          </div> */}
+          <div className="flex justify-between max-w-4xl">
+            <Button 
+              variant={"outline"}
+              onClick={()=>{
+                setActiveTap(index-1)
+              }}
+            >Retour</Button>
+            <Button type="submit">Suivant</Button>
           </div>
         </form>
       </Form>
@@ -242,4 +246,4 @@ function ConjointForm({
   );
 }
 
-export default ConjointForm;
+export default MariageForm;

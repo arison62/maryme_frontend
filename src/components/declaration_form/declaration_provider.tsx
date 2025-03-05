@@ -75,9 +75,22 @@ export const DeclarationTemoinProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [temoin, setTemoin] = useState<Temoin[]>([]);
+  const [temoins, setTemoins] = useState<Temoin[]>([
+    {
+      nom: "",
+      prenom: "",
+      date_naissance: "",
+      telephone: "",
+    },
+    {
+      nom: "",
+      prenom: "",
+      date_naissance: "",
+      telephone: "",
+    }
+  ]);
   return (
-    <DeclarationTemoinContext.Provider value={{ temoin, setTemoin }}>
+    <DeclarationTemoinContext.Provider value={{ temoins, setTemoins }}>
       {children}
     </DeclarationTemoinContext.Provider>
   );

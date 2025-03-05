@@ -237,8 +237,13 @@ function MariageForm({
               onClick={()=>{
                 setActiveTap(index-1)
               }}
-            >Retour</Button>
-            <Button type="submit">Suivant</Button>
+            >Precedent</Button>
+            <Button 
+              type="submit"
+              onClick={()=>{
+                setActiveTap(index+1)
+              }}
+              >Suivant</Button>
           </div>
         </form>
       </Form>

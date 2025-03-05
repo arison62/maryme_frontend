@@ -7,6 +7,7 @@ import CheckOTP from "@/components/check-otp";
 import { DeclarationProvider } from "@/components/declaration_form/declaration_provider";
 import ConjointForm from "@/components/declaration_form/conjoint_form";
 import MariageForm from "@/components/declaration_form/mariage_form";
+import TemoinForm from "@/components/declaration_form/temoin_form";
 
 const TapContext = React.createContext({
   activeTap: 0,
@@ -33,9 +34,13 @@ const tabs = [
     name: "Informatio sur le Celebrant",
     component: <MariageForm index={3} className="w-full mt-8"/>
   },
+  {
+    name: "Informations sur les témoins",
+    component: <TemoinForm index={4} className="w-full mt-8" />,
+  }
 ];
 function DeclarationPage() {
-  const [activeTap, setTap] = useState(3);
+  const [activeTap, setTap] = useState(4);
 
   const tabNames = useMemo(() => tabs.map((tab) => tab.name), []);
   console.log("activeTap", activeTap);

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DeclarationConjointContext, Epouse, Epoux } from "./declaration_provider";
+import { DeclarationTemoinContext } from "./declaration_provider";
 import { FormEvent, useContext } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -20,63 +20,70 @@ import clsx from "clsx";
 import { TapContext } from "@/pages/DeclarationPage";
 
 const formSchema = z.object({
-  nomEpoux: z.string().nonempty(),
-  prenomEpoux: z.string().optional(),
-  date_naissanceEpoux: z.string().min(8).max(10),
-  telephoneEpoux: z.string().nonempty().min(6).max(12),
-  nomEpouse: z.string().nonempty(),
-  prenomEpouse: z.string().optional(),
-  date_naissanceEpouse: z.string().min(8).max(10),
-  telephoneEpouse: z.string().nonempty().min(6).max(12),
+  nomTemoin1: z.string().nonempty(),
+  prenomTemoin1: z.string().optional(),
+  date_naissanceTemoin1: z.string().min(8).max(10),
+  telephoneTemoin1: z.string().nonempty().min(6).max(12),
+  nomTemoin2: z.string().nonempty(),
+  prenomTemoin2: z.string().optional(),
+  date_naissanceTemoin2: z.string().min(8).max(10),
+  telephoneTemoin2: z.string().nonempty().min(6).max(12),
 });
 
-function ConjointForm({
-        index,
-        className
-}:{index: number, className: string}) {
-  const { epouse, epoux, setEpouse, setEpoux } = useContext(
-    DeclarationConjointContext
-  );
+function TemoinForm({
+  index,
+  className,
+}: {
+  index: number;
+  className: string;
+}) {
+  const { temoins, setTemoins } = useContext(DeclarationTemoinContext);
 
-  const {setActiveTap} = useContext(TapContext)
+  const { setActiveTap } = useContext(TapContext);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nomEpoux: epoux.nomEpoux,
-      prenomEpoux: epoux.prenomEpoux,
-      date_naissanceEpoux: epoux.date_naissanceEpoux,
-      telephoneEpoux: epoux.telephoneEpoux,
-      nomEpouse: epouse.nomEpouse,
-      prenomEpouse: epouse.prenomEpouse,
-      date_naissanceEpouse: epouse.date_naissanceEpouse,
-      telephoneEpouse: epouse.telephoneEpouse,
+      nomTemoin1: temoins[0].nom,
+      prenomTemoin1: temoins[0].prenom,
+      date_naissanceTemoin1: temoins[0].date_naissance,
+      telephoneTemoin1: temoins[0].telephone,
+      nomTemoin2: temoins[1].nom,
+      prenomTemoin2: temoins[1].prenom,
+      date_naissanceTemoin2: temoins[1].date_naissance,
+      telephoneTemoin2: temoins[1].telephone,
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
-    setActiveTap( index + 1)
+    setActiveTap(index + 1);
   }
 
-  function onChange(event : FormEvent<HTMLFormElement>){
+  function onChange(event: FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget);
-    const epoux : Epoux = {
-        nomEpoux: formData.get('nomEpoux')?.toString() || "",
-        prenomEpoux: formData.get('prenomEpoux')?.toString() || "",
-        date_naissanceEpoux:  formData.get("date_naissanceEpoux")?.toString() || "",
-        telephoneEpoux: formData.get("telephoneEpoux")?.toString() || ""
-    }
-
-    const epouse : Epouse = {
-        nomEpouse: formData.get('nomEpouse')?.toString() || "",
-        prenomEpouse: formData.get('prenomEpouse')?.toString() || "",
-        date_naissanceEpouse:  formData.get("date_naissanceEpouse")?.toString() || "",
-        telephoneEpouse: formData.get("telephoneEpoux")?.toString() || ""
-    }
-
-    setEpouse(epouse)
-    setEpoux(epoux)
+    const nomTemoin1 = formData.get("nomTemoin1") as string;
+    const prenomTemoin1 = formData.get("prenomTemoin1") as string;
+    const date_naissanceTemoin1 = formData.get("date_naissanceTemoin1") as string;
+    const telephoneTemoin1 = formData.get("telephoneTemoin1") as string;
+    const nomTemoin2 = formData.get("nomTemoin2") as string;
+    const prenomTemoin2 = formData.get("prenomTemoin2") as string;
+    const date_naissanceTemoin2 = formData.get("date_naissanceTemoin2") as string;
+    const telephoneTemoin2 = formData.get("telephoneTemoin2") as string;
+    setTemoins([
+      {
+        nom: nomTemoin1,
+        prenom: prenomTemoin1,
+        date_naissance: date_naissanceTemoin1,
+        telephone: telephoneTemoin1,
+      },
+      {
+        nom: nomTemoin2,
+        prenom: prenomTemoin2,
+        date_naissance: date_naissanceTemoin2,
+        telephone: telephoneTemoin2,
+      },
+    ]);
   }
 
   return (
@@ -89,20 +96,20 @@ function ConjointForm({
         >
           <div>
             <h2 className="text-xl font-bold text-green-800 mb-4">
-              Informations sur l'epoux
+              Informations sur le temoin de l'epoux
             </h2>
             <div className="flex flex-col md:flex-row md:gap-4">
               <FormField
                 control={form.control}
-                name="nomEpoux"
+                name="nomTemoin1"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Nom de l'époux</FormLabel>
+                    <FormLabel>Nom</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      Veuillez entrer le nom de l'époux
+                      Veuillez entrer le nom du temoin
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -110,15 +117,15 @@ function ConjointForm({
               ></FormField>
               <FormField
                 control={form.control}
-                name="prenomEpoux"
+                name="prenomTemoin1"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Prenom de l'époux</FormLabel>
+                    <FormLabel>Prenom </FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      Veuillez entrer le prenom de l'époux
+                      Veuillez entrer le prenom du temoin
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -128,10 +135,10 @@ function ConjointForm({
             <div className="flex flex-col md:flex-row gap-4">
               <FormField
                 control={form.control}
-                name="date_naissanceEpoux"
+                name="date_naissanceTemoin1"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Date naissance Epoux</FormLabel>
+                    <FormLabel>Date naissance</FormLabel>
                     <FormControl>
                       <Input {...field} type="date" />
                     </FormControl>
@@ -144,7 +151,7 @@ function ConjointForm({
               ></FormField>
               <FormField
                 control={form.control}
-                name="telephoneEpoux"
+                name="telephoneTemoin1"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
                     <FormLabel>Numero de telephone </FormLabel>
@@ -162,20 +169,20 @@ function ConjointForm({
           </div>
           <div>
             <h2 className="text-xl font-bold text-green-800 mb-4">
-              Informations sur l'epouse
+              Informations sur le temoin l'epouse
             </h2>
             <div className="flex flex-col md:flex-row md:gap-4">
               <FormField
                 control={form.control}
-                name="nomEpouse"
+                name="nomTemoin2"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Nom de l'épouse</FormLabel>
+                    <FormLabel>Nom</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      Veuillez entrer le nom de l'épouse
+                      Veuillez entrer le nom du temoin
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -183,15 +190,15 @@ function ConjointForm({
               ></FormField>
               <FormField
                 control={form.control}
-                name="prenomEpouse"
+                name="prenomTemoin2"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Prenom de l'épouse</FormLabel>
+                    <FormLabel>Prenom</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      Veuillez entrer le prenom de l'épouse
+                      Veuillez entrer le prenom du temoin
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -201,10 +208,10 @@ function ConjointForm({
             <div className="flex flex-col md:flex-row gap-4">
               <FormField
                 control={form.control}
-                name="date_naissanceEpouse"
+                name="date_naissanceTemoin2"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Date naissance Epouse</FormLabel>
+                    <FormLabel>Date naissance</FormLabel>
                     <FormControl>
                       <Input {...field} type="date" />
                     </FormControl>
@@ -217,7 +224,7 @@ function ConjointForm({
               ></FormField>
               <FormField
                 control={form.control}
-                name="telephoneEpouse"
+                name="telephoneTemoin2"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-md pb-4">
                     <FormLabel>Numero de telephone </FormLabel>
@@ -233,7 +240,10 @@ function ConjointForm({
               ></FormField>
             </div>
           </div>
-          <div className="flex justify-end max-w-4xl">
+          <div className="flex justify-between max-w-4xl">
+            <Button variant={"outline"} onClick={() => setActiveTap(index - 1)}>
+              Precedent
+            </Button>
             <Button type="submit">Suivant</Button>
           </div>
         </form>
@@ -242,4 +252,4 @@ function ConjointForm({
   );
 }
 
-export default ConjointForm;
+export default TemoinForm;

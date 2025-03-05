@@ -83,10 +83,10 @@ export const DeclarationCelebrantContext = createContext<{
   });
 
 export const DeclarationTemoinContext = createContext<{
-    temoin: Temoin[];
-    setTemoin: React.Dispatch<React.SetStateAction<Temoin[]>>;
+    temoins: Temoin[];
+    setTemoins: React.Dispatch<React.SetStateAction<Temoin[]>>;
   }>({
-    temoin: [],
-    setTemoin: () => {},
+    temoins: [],
+    setTemoins: () => {},
   });
 

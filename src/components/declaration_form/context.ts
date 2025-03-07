@@ -3,7 +3,8 @@ import { createContext } from "react";
 export type Mariage = {
   date_mariage: string;
   lieu_mariage: string;
-  id_commune: number
+  id_commune: number,
+  nom_commune?: string
 }
 
 
@@ -65,6 +66,7 @@ export const DeclarationMariageContext = createContext<{
     mariage: {
       date_mariage: "",
       lieu_mariage: "",
+      nom_commune: "",
       id_commune: 0
     },
     setMariage: () => {},

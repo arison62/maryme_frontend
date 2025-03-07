@@ -73,7 +73,7 @@ function MariageForm({
     setMariage({
       date_mariage: date_mariage,
       lieu_mariage: "",
-      id_commune: 0
+      id_commune: mariage.id_commune
     });
   }
 

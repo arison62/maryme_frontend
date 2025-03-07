@@ -61,6 +61,7 @@ export const DeclarationMariageProvider = ({
   const [mariage, setMariage] = useState({
     date_mariage: "",
     lieu_mariage: "",
+    nom_commune: "",
     id_commune: 0,
   });
   return (

@@ -11,14 +11,14 @@ export type Mariage = {
 export type Celebrant = {
   nom: string;
   prenom?: string;
-  date_naissance: string;
+
   telephone: string;
 }
 
 export type Temoin = {
   nom: string;
   prenom?: string;
-  date_naissance: string;
+  
   telephone: string;
 }
 
@@ -78,7 +78,7 @@ export const DeclarationCelebrantContext = createContext<{
   }>({
     celebrant: {
       nom: "",
-      date_naissance: "",
+    
       telephone: "",
     },
     setCelebrant: () => {},

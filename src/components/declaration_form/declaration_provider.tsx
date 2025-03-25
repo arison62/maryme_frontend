@@ -43,7 +43,6 @@ export const DeclarationCelebrantProvider = ({
 }) => {
   const [celebrant, setCelebrant] = useState<Celebrant>({
     nom: "",
-    date_naissance: "",
     telephone: "",
   });
   return (
@@ -58,7 +57,7 @@ export const DeclarationMariageProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [mariage, setMariage] = useState({
+  const [mariage, setMariage] = useState<Mariage>({
     date_mariage: "",
     lieu_mariage: "",
     nom_commune: "",
@@ -80,13 +79,13 @@ export const DeclarationTemoinProvider = ({
     {
       nom: "",
       prenom: "",
-      date_naissance: "",
+   
       telephone: "",
     },
     {
       nom: "",
       prenom: "",
-      date_naissance: "",
+     
       telephone: "",
     }
   ]);

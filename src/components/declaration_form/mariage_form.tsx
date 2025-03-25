@@ -24,7 +24,6 @@ import { TapContext } from "@/pages/DeclarationPage";
 const formSchema = z.object({
   nomCelebrant: z.string().nonempty(),
   prenomCelebrant: z.string().optional(),
-  date_naissanceCelebrant: z.string().min(8).max(10),
   telephoneCelebrant: z.string().nonempty().min(6).max(12),
   date_mariage: z.string().min(8).max(10),
   id_commune: z.number()
@@ -45,7 +44,6 @@ function MariageForm({
     defaultValues: {
       nomCelebrant: celebrant.nom,
       prenomCelebrant: celebrant.prenom,
-      date_naissanceCelebrant: celebrant.date_naissance,
       telephoneCelebrant: celebrant.telephone,
       date_mariage: mariage.date_mariage,
       id_commune: mariage.id_commune
@@ -68,7 +66,6 @@ function MariageForm({
       nom: nomCelebrant,
       prenom: prenomCelebrant,
       telephone: telephoneCelebrant,
-      date_naissance: ""
     });
     setMariage({
       date_mariage: date_mariage,

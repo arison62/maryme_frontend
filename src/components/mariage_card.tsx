@@ -8,20 +8,23 @@ import {
 
 
 
-const MarriageCard = () => {
+const MarriageCard = ({idDeclaration, ref}: {
+  idDeclaration: number | null,
+  ref: React.Ref<HTMLDivElement> | undefined
+}) => {
     const {mariage} = useContext(DeclarationMariageContext)
     const {celebrant} = useContext(DeclarationCelebrantContext)
     const {epouse, epoux} = useContext(DeclarationConjointContext)
     const {temoins} = useContext(DeclarationTemoinContext)
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl my-8 border-2 border-[rgb(1,167,1)] w-full">
+    <div ref={ref} className="bg-white rounded-lg shadow-lg p-6 max-w-4xl my-8 border-2 border-[rgb(1,167,1)] w-full">
       {/* En-tête */}
       <div className="mb-8 text-center border-b-2 border-[rgb(1,167,1)] pb-4">
         <h1
           className="text-2xl font-bold text-[rgb(1,167,1)]"
           style={{ fontFamily: "Times New Roman, serif" }}
         >
-          Information Declaration
+          Declaration No: {idDeclaration}
         </h1>
         <p className="text-[rgb(1,167,1)] mt-2 text-sm opacity-80">
           Commune : {mariage.nom_commune}
@@ -40,12 +43,7 @@ const MarriageCard = () => {
               {mariage.date_mariage}
             </p>
           </div>
-          <div>
-            <p className="text-sm">
-              <span className="font-medium text-[rgb(1,167,1)]">Lieu:</span>{" "}
-              {mariage.lieu_mariage}
-            </p>
-          </div>
+         
         </div>
       </div>
 
@@ -65,10 +63,7 @@ const MarriageCard = () => {
               {celebrant.prenom}
             </p>
           )}
-          <p className="text-sm">
-            <span className="font-medium text-[rgb(1,167,1)]">Naissance:</span>{" "}
-            {celebrant.date_naissance}
-          </p>
+         
           <p className="text-sm">
             <span className="font-medium text-[rgb(1,167,1)]">Téléphone:</span>{" "}
             {celebrant.telephone}
@@ -115,7 +110,7 @@ const MarriageCard = () => {
             {temoin.prenom && (
               <p className="text-sm">Prénom: {temoin.prenom}</p>
             )}
-            <p className="text-sm">Naissance: {temoin.date_naissance}</p>
+          
             <p className="text-sm">Téléphone: {temoin.telephone}</p>
           </div>
         ))}

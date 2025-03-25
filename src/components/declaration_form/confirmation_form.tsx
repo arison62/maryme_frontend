@@ -1,8 +1,13 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { get } from "@/api/client";
+import { get, post } from "@/api/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DeclarationMariageContext } from "./declaration_provider";
+import {
+  DeclarationCelebrantContext,
+  DeclarationConjointContext,
+  DeclarationMariageContext,
+  DeclarationTemoinContext,
+} from "./declaration_provider";
 import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +23,9 @@ import { TapContext } from "@/pages/DeclarationPage";
 import { Select, SelectContent, SelectItem } from "../ui/select";
 import { SelectTrigger, SelectValue } from "@radix-ui/react-select";
 import MarriageCard from "../mariage_card";
+import CircularProgressIndicator from "../ui/circular-progress-indicator";
+import { useToast } from "@/hooks/use-toast";
+import generatePDF from 'react-to-pdf';
 
 type DataCommune = {
   id_commune: number;
@@ -52,13 +60,20 @@ function Confirmation({
   className: string;
 }) {
   const { mariage, setMariage } = useContext(DeclarationMariageContext);
+  const { celebrant } = useContext(DeclarationCelebrantContext);
+  const { epouse, epoux } = useContext(DeclarationConjointContext);
+  const { temoins } = useContext(DeclarationTemoinContext);
+
   const { setActiveTap } = useContext(TapContext);
   const [regions, setRegions] = useState<DataRegion[]>([]);
   const [departements, setDepartements] = useState<DataDepartement[]>([]);
   const [communes, setCommunes] = useState<DataCommune[]>([]);
   const [isProgress, setIsProgess] = useState(false);
-  const ref = useRef<HTMLFormElement>(null);
-
+  const isFirtstRender = useRef(true);
+  const [id_declaration, setIdDeclaration] = useState<number | null>(null);
+  const [isSent, setIsSent] = useState(false);
+  const {toast} = useToast();
+  const pdfDeclaration = useRef<HTMLDivElement>(null);
   useEffect(() => {
     setIsProgess(true);
     async function getData() {
@@ -68,7 +83,6 @@ function Confirmation({
         (typeof data.error == "boolean" && data.error == false) ||
         data.error == undefined
       ) {
-        console.log(data);
         setRegions(data.data);
         setIsProgess(false);
       } else {
@@ -77,6 +91,61 @@ function Confirmation({
     }
     getData();
   }, []);
+
+  useEffect(() => {
+    if (!isFirtstRender.current) {
+      setIsProgess(true);
+      async function setDeclaration() {
+        console.log("Set declaration");
+        const data = await post<{
+          id: number;
+        }>("declaration/create", {
+          celebrant: celebrant,
+          temoins: temoins,
+          id_commune: mariage.id_commune,
+          date_celebration: mariage.date_mariage,
+          epoux: {
+            nom: epoux.nomEpoux,
+            prenom: epoux.prenomEpoux,
+            telephone: epoux.telephoneEpoux,
+            date_naissance: epoux.date_naissanceEpoux,
+          },
+          epouse: {
+            nom: epouse.nomEpouse,
+            prenom: epouse.prenomEpouse,
+            telephone: epouse.telephoneEpouse,
+            date_naissance: epouse.date_naissanceEpouse,
+          },
+        });
+
+        if (
+          (typeof data.error == "boolean" && data.error == false) ||
+          data.error == undefined
+        ) {
+          console.log(data);
+          setIdDeclaration(data.data.id);
+          toast({
+            title: "Déclaration envoyée",
+            description: "Votre déclaration a été envoyée avec succès",
+          })
+        } else {
+          console.log(data.message);
+          toast({
+            variant: "destructive",
+            title: "Déclaration non envoyée",
+            description: data.message,
+          })
+        }
+        setIsProgess(false);
+        setIsSent(false);
+      }
+      setDeclaration();
+    }else{
+      isFirtstRender.current = false;
+    }
+    console.log("isFirtstRender", isFirtstRender);
+   
+  }, [isSent]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,29 +156,40 @@ function Confirmation({
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
-    setMariage({
-      ...mariage,
-      id_commune: parseInt(values.id_commune),
-    });
   }
-  console.log(communes)
+
   function onChange(event: FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget);
     const id_region = formData.get("id_region") as string;
     const id_departement = formData.get("id_departement") as string;
-   
-    const departement = regions.find((region) => region.id_region == parseInt(id_region))?.Departements;
-    console.log(departement)
-    const communes = departement?.find((departement) => departement.id_departement == parseInt(id_departement))?.Communes;
+    const id_commune = formData.get("id_commune") as string;
+
+    console.log("onchange : ", id_region, id_departement, id_commune);
+    const departement = regions.find(
+      (region) => region.id_region == parseInt(id_region)
+    )?.Departements;
+    console.log(departement);
+    const communes = departement?.find(
+      (departement) => departement.id_departement == parseInt(id_departement)
+    )?.Communes;
     setDepartements(departement ?? []);
     setCommunes(communes ?? []);
+    if (id_commune) {
+      console.log("onchange : ", id_region, id_departement, id_commune);
+      setMariage({
+        ...mariage,
+        nom_commune: communes?.find(
+          (commune) => commune.id_commune == parseInt(id_commune)
+        )?.nom,
+        id_commune: parseInt(id_commune),
+      });
+    }
   }
 
   return (
     <div className={clsx("w-full mb-4", className)}>
       <Form {...form}>
         <form
-            ref={ref}
           className="flex gap-8 flex-col"
           onSubmit={form.handleSubmit(onSubmit)}
           onChange={onChange}
@@ -132,77 +212,79 @@ function Confirmation({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        
-                        {!isProgress && regions.map((region) => (
-                          <SelectItem
-                            value={region.id_region.toString()}
-                            key={region.id_region}
-                          >
-                            {region.nom}
-                          </SelectItem>
-                        ))}
+                        {!isProgress &&
+                          regions.map((region) => (
+                            <SelectItem
+                              value={region.id_region.toString()}
+                              key={region.id_region}
+                            >
+                              {region.nom}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
                 )}
               ></FormField>
-             <FormField
+              <FormField
                 control={form.control}
                 name="id_departement"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-sm pb-4 flex flex-col">
                     <FormLabel>Departement</FormLabel>
-                    <Select>
+                    <Select name={field.name}>
                       <FormControl>
                         <SelectTrigger className="w-[280px] border border-gray-300 rounded-md">
                           <SelectValue placeholder="Choisissez votre departement" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {!isProgress && departements.map((departement) => (
-                          <SelectItem
-                            value={departement.id_departement.toString()}
-                            key={departement.id_departement}
-                          >
-                            {departement.nom}
-                          </SelectItem>
-                        ))}
+                        {!isProgress &&
+                          departements.map((departement) => (
+                            <SelectItem
+                              value={departement.id_departement.toString()}
+                              key={departement.id_departement}
+                            >
+                              {departement.nom}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
                 )}
               ></FormField>
-               <FormField
+              <FormField
                 control={form.control}
                 name="id_commune"
                 render={({ field }) => (
                   <FormItem className="w-full max-w-sm pb-4 flex flex-col">
                     <FormLabel>Commune</FormLabel>
-                    <Select>
+                    <Select name={field.name}>
                       <FormControl>
                         <SelectTrigger className="w-[280px] border border-gray-300 rounded-md">
                           <SelectValue placeholder="Choisissez votre commune" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {!isProgress && communes.map((commune) => (
-                          <SelectItem
-                            value={commune.id_commune.toString()}
-                            key={commune.id_commune}
-                          >
-                            {commune.nom}
-                          </SelectItem>
-                        ))}
+                        {!isProgress &&
+                          communes.map((commune) => (
+                            <SelectItem
+                              value={commune.id_commune.toString()}
+                              key={commune.id_commune}
+                            >
+                              {commune.nom}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
                 )}
               ></FormField>
             </div>
-           
           </div>
-        <MarriageCard />
+          <MarriageCard idDeclaration={id_declaration} ref={pdfDeclaration}/>
           <div className="flex justify-between max-w-4xl">
+
             <Button
               variant={"outline"}
               onClick={() => {
@@ -211,14 +293,29 @@ function Confirmation({
             >
               Precedent
             </Button>
-            <Button
-              type="submit"
-              onClick={() => {
-                setActiveTap(index + 1);
-              }}
-            >
-              Suivant
-            </Button>
+            {
+              id_declaration == null ? (
+                <Button
+                  type="submit"
+                  disabled={isProgress}
+                  onClick={() => {
+                    setIsSent(true);
+                  }}
+                >
+                  {isProgress && <CircularProgressIndicator />}
+                  Enregister
+                </Button>
+              ):(
+                <Button
+                  onClick={
+                    ()=> generatePDF(pdfDeclaration, {filename: `declaration-${id_declaration}.pdf`})
+                  }
+                >
+                  Telecharger
+                </Button>
+              )
+            }
+          
           </div>
         </form>
       </Form>

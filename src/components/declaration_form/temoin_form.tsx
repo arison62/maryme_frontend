@@ -22,11 +22,11 @@ import { TapContext } from "@/pages/DeclarationPage";
 const formSchema = z.object({
   nomTemoin1: z.string().nonempty(),
   prenomTemoin1: z.string().optional(),
-  date_naissanceTemoin1: z.string().min(8).max(10),
+ 
   telephoneTemoin1: z.string().nonempty().min(6).max(12),
   nomTemoin2: z.string().nonempty(),
   prenomTemoin2: z.string().optional(),
-  date_naissanceTemoin2: z.string().min(8).max(10),
+ 
   telephoneTemoin2: z.string().nonempty().min(6).max(12),
 });
 
@@ -46,11 +46,11 @@ function TemoinForm({
     defaultValues: {
       nomTemoin1: temoins[0].nom,
       prenomTemoin1: temoins[0].prenom,
-      date_naissanceTemoin1: temoins[0].date_naissance,
+     
       telephoneTemoin1: temoins[0].telephone,
       nomTemoin2: temoins[1].nom,
       prenomTemoin2: temoins[1].prenom,
-      date_naissanceTemoin2: temoins[1].date_naissance,
+    
       telephoneTemoin2: temoins[1].telephone,
     },
   });
@@ -64,23 +64,23 @@ function TemoinForm({
     const formData = new FormData(event.currentTarget);
     const nomTemoin1 = formData.get("nomTemoin1") as string;
     const prenomTemoin1 = formData.get("prenomTemoin1") as string;
-    const date_naissanceTemoin1 = formData.get("date_naissanceTemoin1") as string;
+   
     const telephoneTemoin1 = formData.get("telephoneTemoin1") as string;
     const nomTemoin2 = formData.get("nomTemoin2") as string;
     const prenomTemoin2 = formData.get("prenomTemoin2") as string;
-    const date_naissanceTemoin2 = formData.get("date_naissanceTemoin2") as string;
+   
     const telephoneTemoin2 = formData.get("telephoneTemoin2") as string;
     setTemoins([
       {
         nom: nomTemoin1,
         prenom: prenomTemoin1,
-        date_naissance: date_naissanceTemoin1,
+      
         telephone: telephoneTemoin1,
       },
       {
         nom: nomTemoin2,
         prenom: prenomTemoin2,
-        date_naissance: date_naissanceTemoin2,
+      
         telephone: telephoneTemoin2,
       },
     ]);
@@ -133,22 +133,6 @@ function TemoinForm({
               ></FormField>
             </div>
             <div className="flex flex-col md:flex-row gap-4">
-              <FormField
-                control={form.control}
-                name="date_naissanceTemoin1"
-                render={({ field }) => (
-                  <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Date naissance</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="date" />
-                    </FormControl>
-                    <FormDescription>
-                      Veuillez entrer la date de naissance
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
               <FormField
                 control={form.control}
                 name="telephoneTemoin1"
@@ -206,22 +190,6 @@ function TemoinForm({
               ></FormField>
             </div>
             <div className="flex flex-col md:flex-row gap-4">
-              <FormField
-                control={form.control}
-                name="date_naissanceTemoin2"
-                render={({ field }) => (
-                  <FormItem className="w-full max-w-md pb-4">
-                    <FormLabel>Date naissance</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="date" />
-                    </FormControl>
-                    <FormDescription>
-                      Veuillez entrer la date de naissance
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              ></FormField>
               <FormField
                 control={form.control}
                 name="telephoneTemoin2"

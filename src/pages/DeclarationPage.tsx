@@ -45,7 +45,7 @@ const tabs = [
   }
 ];
 function DeclarationPage() {
-  const [activeTap, setTap] = useState(2);
+  const [activeTap, setTap] = useState(0);
 
   const tabNames = useMemo(() => tabs.map((tab) => tab.name), []);
   console.log("activeTap", activeTap);

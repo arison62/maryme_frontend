@@ -30,7 +30,7 @@ export default function AuthPage() {
   const { toast } = useToast()
   const [isLogin, setIsLogin] = useState(true)
   
-  const form = useForm<z.infer<typeof baseSchema>>({
+  const form = useForm<z.infer<typeof baseSchema | typeof signupSchema>>({
     resolver: zodResolver(isLogin ? baseSchema : signupSchema),
     defaultValues: {
       email: "",

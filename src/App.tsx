@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router"
 import HomePage from "./pages/HomePage"
 import DeclarationPage from "./pages/DeclarationPage"
-import Login from "./pages/LoginPage"
+import AuthPage from "./pages/AuthPage"
 
 function App() {
 
@@ -9,7 +9,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<AuthPage />} />
         <Route path="/declaration" element={<DeclarationPage />} />
       </Routes>
     </BrowserRouter>

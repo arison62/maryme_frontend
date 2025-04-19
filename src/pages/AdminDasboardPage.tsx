@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useForm, useWatch } from "react-hook-form";
@@ -326,7 +327,7 @@ export default function AdminDashboard() {
   }, [watchedDepartementOfficerForm, departements, officerForm, toast]);
 
   // Fonction pour créer une commune
-  const handleCreateCommune = async (values) => {
+  const handleCreateCommune = async (values : any) => {
     try {
       // Simuler l'appel API pour créer une commune
       const response = await post<{
@@ -368,7 +369,7 @@ export default function AdminDashboard() {
   };
 
   // Fonction pour créer un officier
-  const handleCreateOfficer = async (values) => {
+  const handleCreateOfficer = async (values : any) => {
     try {
       const response = await post<{
         token: string;

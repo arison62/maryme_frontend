@@ -1,16 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useToast } from '@/hooks/use-toast';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import logoImg from "../assets/logo.png";
+import * as z from "zod";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -18,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Form,
   FormControl,
@@ -26,15 +23,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { get, post } from '@/api/client'; // Assurez-vous que le chemin est correct
+} from "@/components/ui/select";
+import { get, post } from "@/api/client"; // Assurez-vous que le chemin est correct
+import { Link } from "react-router";
 
 // Types pour les données (Région, Département, Commune)
 type DataCommune = {
@@ -56,18 +54,33 @@ type DataRegion = {
   Departements: DataDepartement[];
 };
 
+type DataAdmin = {
+  fullName: string,
+  id: number,
+  email: string,
+}
+
 // Schéma de validation pour la création de commune
 const communeSchema = z.object({
-  id_region: z.string().min(1, { message: 'Veuillez sélectionner une région.' }),
-  id_departement: z.string().min(1, { message: 'Veuillez sélectionner un département.' }),
-  nom_commune: z.string().min(2, { message: 'Le nom de la commune doit contenir au moins 2 caractères.' }),
+  id_region: z
+    .string()
+    .min(1, { message: "Veuillez sélectionner une région." }),
+  id_departement: z
+    .string()
+    .min(1, { message: "Veuillez sélectionner un département." }),
+  nom_commune: z
+    .string()
+    .min(2, {
+      message: "Le nom de la commune doit contenir au moins 2 caractères.",
+    }),
 });
 
 // Schéma de validation pour la création d'officier
 const officerSchema = z.object({
-  fullName: z.string().min(3, "Nom complet requis"),
+  nom: z.string().min(3, "Nom complet requis"),
+  prenom: z.string(),
   email: z.string().email("Email invalide"),
-  phone: z.string().regex(/^[0-9]{10}$/, "Numéro invalide"),
+  phone: z.string().regex(/^[0-9]{9}$/, "Numéro invalide"),
   password: z.string().min(8, "8 caractères minimum"),
   id_region: z.string().min(1, "Veuillez sélectionner une région"),
   id_departement: z.string().min(1, "Veuillez sélectionner un département"),
@@ -76,21 +89,21 @@ const officerSchema = z.object({
 
 export default function AdminDashboard() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('communes');
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("communes");
   const [regions, setRegions] = useState<DataRegion[]>([]);
   const [departements, setDepartements] = useState<DataDepartement[]>([]);
   const [communes, setCommunes] = useState<DataCommune[]>([]); // Ajout de l'état pour les communes
-  const [officers, setOfficers] = useState([]);
-  const [pendingAdmins, setPendingAdmins] = useState([]);
+  const [pendingAdmins, setPendingAdmins] = useState<DataAdmin[]>([]);
   const [loading, setLoading] = useState(true); // Ajout de l'état pour le chargement
 
   // Initialisation du formulaire pour la création de commune
   const communeForm = useForm<z.infer<typeof communeSchema>>({
     resolver: zodResolver(communeSchema),
     defaultValues: {
-      id_region: '',
-      id_departement: '',
-      nom_commune: '',
+      id_region: "",
+      id_departement: "",
+      nom_commune: "",
     },
   });
 
@@ -98,22 +111,35 @@ export default function AdminDashboard() {
   const officerForm = useForm<z.infer<typeof officerSchema>>({
     resolver: zodResolver(officerSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
-      phone: '',
-      password: '',
-      id_region: '',
-      id_departement: '',
-      id_commune: '', // Initialisation du champ id_commune
+      nom: "",
+      prenom: "",
+      email: "",
+      phone: "",
+      password: "",
+      id_region: "",
+      id_departement: "",
+      id_commune: "", // Initialisation du champ id_commune
     },
   });
 
   // Utilisation de useWatch pour observer les changements de région et département
-  const watchedRegionCommuneForm = useWatch({ control: communeForm.control, name: "id_region" });
-  const watchedDepartementCommuneForm = useWatch({ control: communeForm.control, name: "id_departement" });
+  const watchedRegionCommuneForm = useWatch({
+    control: communeForm.control,
+    name: "id_region",
+  });
+  const watchedDepartementCommuneForm = useWatch({
+    control: communeForm.control,
+    name: "id_departement",
+  });
 
-  const watchedRegionOfficerForm = useWatch({ control: officerForm.control, name: "id_region" });
-  const watchedDepartementOfficerForm = useWatch({ control: officerForm.control, name: "id_departement" });
+  const watchedRegionOfficerForm = useWatch({
+    control: officerForm.control,
+    name: "id_region",
+  });
+  const watchedDepartementOfficerForm = useWatch({
+    control: officerForm.control,
+    name: "id_departement",
+  });
 
   // Récupération des régions
   const fetchRegions = useCallback(async () => {
@@ -121,33 +147,47 @@ export default function AdminDashboard() {
     try {
       const data = await get<DataRegion[]>("regions"); // Assurez-vous que "regions" est le bon endpoint
 
-      if (data && !data.error) { // Vérification de la structure de la réponse
+      if (data && !data.error) {
+        // Vérification de la structure de la réponse
         setRegions(data.data);
       } else {
-        console.error("Erreur lors de la récupération des régions:", data?.message || "Erreur inconnue");
+        console.error(
+          "Erreur lors de la récupération des régions:",
+          data?.message || "Erreur inconnue"
+        );
         toast({
-          variant: 'destructive',
-          title: 'Erreur',
-          description: 'Impossible de récupérer la liste des régions.',
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de récupérer la liste des régions.",
         });
       }
     } catch (error) {
       console.error("Erreur lors de la requête pour les régions:", error);
       toast({
-        variant: 'destructive',
-        title: 'Erreur',
-        description: 'Une erreur s\'est produite lors de la communication avec le serveur.',
+        variant: "destructive",
+        title: "Erreur",
+        description:
+          "Une erreur s'est produite lors de la communication avec le serveur.",
       });
     } finally {
       setLoading(false);
     }
   }, [toast]);
-
+  useEffect(() => {
+    const isAdmin = localStorage.getItem("isAdmin");
+    if(isAdmin !== "true") {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Vous n'avez pas accès à cette page.",
+      });
+      navigate("/");
+    }
+  }, [navigate, toast]);
   // Appel de fetchRegions au chargement du composant
   useEffect(() => {
     fetchRegions();
   }, [fetchRegions]);
-
 
   // Mise à jour des départements en fonction de la région sélectionnée (Commune Form)
   useEffect(() => {
@@ -157,16 +197,22 @@ export default function AdminDashboard() {
         setLoading(true);
         try {
           // Simuler une requête API
-          const response = regions.find((region) => region.id_region === selectedRegionId)?.Departements || [];
+          const response =
+            regions.find((region) => region.id_region === selectedRegionId)
+              ?.Departements || [];
           setDepartements(response);
-          communeForm.setValue('id_departement', '');
+          communeForm.setValue("id_departement", "");
           setCommunes([]); // Réinitialise les communes quand le département change
         } catch (error) {
-          console.error('Erreur lors de la récupération des départements :', error);
+          console.error(
+            "Erreur lors de la récupération des départements :",
+            error
+          );
           toast({
-            variant: 'destructive',
-            title: 'Erreur',
-            description: 'Une erreur s\'est produite lors de la récupération des départements.',
+            variant: "destructive",
+            title: "Erreur",
+            description:
+              "Une erreur s'est produite lors de la récupération des départements.",
           });
         } finally {
           setLoading(false);
@@ -175,7 +221,7 @@ export default function AdminDashboard() {
       fetchDepartements();
     } else {
       setDepartements([]);
-      communeForm.setValue('id_departement', '');
+      communeForm.setValue("id_departement", "");
       setCommunes([]);
     }
   }, [watchedRegionCommuneForm, regions, communeForm, toast]);
@@ -187,26 +233,29 @@ export default function AdminDashboard() {
       const fetchCommunes = async () => {
         setLoading(true);
         try {
-          const response = departements.find((departement) => departement.id_departement === selectedDepartementId)?.Communes || [];
+          const response =
+            departements.find(
+              (departement) =>
+                departement.id_departement === selectedDepartementId
+            )?.Communes || [];
           setCommunes(response);
         } catch (error) {
           console.error("Erreur lors de la récupération des communes", error);
           toast({
-            variant: 'destructive',
-            title: 'Erreur',
-            description: 'Une erreur s\'est produite lors de la récupération des communes.',
+            variant: "destructive",
+            title: "Erreur",
+            description:
+              "Une erreur s'est produite lors de la récupération des communes.",
           });
         } finally {
           setLoading(false);
         }
-      }
+      };
       fetchCommunes();
     } else {
       setCommunes([]);
     }
   }, [watchedDepartementCommuneForm, departements, toast]);
-
-
 
   // Mise à jour des départements et des communes pour Officier Form
   useEffect(() => {
@@ -215,16 +264,22 @@ export default function AdminDashboard() {
       const fetchOfficerDepartements = async () => {
         setLoading(true);
         try {
-          const response = regions.find((region) => region.id_region === selectedRegionId)?.Departements || [];
+          const response =
+            regions.find((region) => region.id_region === selectedRegionId)
+              ?.Departements || [];
           setDepartements(response);
-          officerForm.setValue('id_departement', '');
-          officerForm.setValue('id_commune', '');
+          officerForm.setValue("id_departement", "");
+          officerForm.setValue("id_commune", "");
         } catch (error) {
-          console.error("Erreur lors de la récupération des départements (Officier):", error);
+          console.error(
+            "Erreur lors de la récupération des départements (Officier):",
+            error
+          );
           toast({
-            variant: 'destructive',
-            title: 'Erreur',
-            description: 'Une erreur s\'est produite lors de la récupération des départements.',
+            variant: "destructive",
+            title: "Erreur",
+            description:
+              "Une erreur s'est produite lors de la récupération des départements.",
           });
         } finally {
           setLoading(false);
@@ -233,8 +288,8 @@ export default function AdminDashboard() {
       fetchOfficerDepartements();
     } else {
       setDepartements([]);
-      officerForm.setValue('id_departement', '');
-      officerForm.setValue('id_commune', '');
+      officerForm.setValue("id_departement", "");
+      officerForm.setValue("id_commune", "");
     }
   }, [watchedRegionOfficerForm, regions, officerForm, toast]);
 
@@ -244,69 +299,70 @@ export default function AdminDashboard() {
       const fetchOfficerCommunes = async () => {
         setLoading(true);
         try {
-          const response = departements.find((departement) => departement.id_departement === selectedDepartementId)?.Communes || [];
+          const response =
+            departements.find(
+              (departement) =>
+                departement.id_departement === selectedDepartementId
+            )?.Communes || [];
           setCommunes(response);
-          officerForm.setValue('id_commune', '');
+          officerForm.setValue("id_commune", "");
         } catch (error) {
           console.error("Erreur lors de la récupération des communes", error);
           toast({
-            variant: 'destructive',
-            title: 'Erreur',
-            description: 'Une erreur s\'est produite lors de la récupération des communes.',
+            variant: "destructive",
+            title: "Erreur",
+            description:
+              "Une erreur s'est produite lors de la récupération des communes.",
           });
         } finally {
           setLoading(false);
         }
-      }
+      };
       fetchOfficerCommunes();
     } else {
       setCommunes([]);
-      officerForm.setValue('id_commune', '');
+      officerForm.setValue("id_commune", "");
     }
   }, [watchedDepartementOfficerForm, departements, officerForm, toast]);
-
-
 
   // Fonction pour créer une commune
   const handleCreateCommune = async (values) => {
     try {
       // Simuler l'appel API pour créer une commune
-      const response = await post<
-      {
-        nom: string,
-        id_commune: number,
-        id_departement: number
-      }
-      >('commune/create', {
+      const response = await post<{
+        nom: string;
+        id_commune: number;
+        id_departement: number;
+      }>("commune/create", {
         ...values,
-        nom: values.nom_commune
+        nom: values.nom_commune,
       });
-      
-      if(!response.error){
+
+      if (!response.error) {
         const newCommune = {
-            id_commune: response.data.id_commune, // Simuler un ID
-            nom: response.data.nom,
-            id_departement: response.data.id_departement,
-          };
-    
-          setCommunes([...communes, newCommune]); // Mettre à jour l'état local
-          toast({ title: 'Commune créée avec succès' });
-          communeForm.reset();
-      }else{
-        console.log(response)
+          id_commune: response.data.id_commune, // Simuler un ID
+          nom: response.data.nom,
+          id_departement: response.data.id_departement,
+        };
+
+        setCommunes([...communes, newCommune]); // Mettre à jour l'état local
+        toast({ title: "Commune créée avec succès" });
+        communeForm.reset();
+      } else {
+        console.log(response);
         toast({
-            variant: 'destructive',
-            title: "Erreur creation",
-            description: response.message || response.error
-        })
+          variant: "destructive",
+          title: "Erreur creation",
+          description: response.message || response.error,
+        });
       }
-      
-     
     } catch (error: any) {
       toast({
-        variant: 'destructive',
-        title: 'Erreur de création',
-        description: error.message || 'Une erreur est survenue lors de la création de la commune.',
+        variant: "destructive",
+        title: "Erreur de création",
+        description:
+          error.message ||
+          "Une erreur est survenue lors de la création de la commune.",
       });
     }
   };
@@ -314,20 +370,36 @@ export default function AdminDashboard() {
   // Fonction pour créer un officier
   const handleCreateOfficer = async (values) => {
     try {
-      // Simuler l'appel API pour créer un officier
-      const newOfficer = {
-        id: officers.length + 1, // Simuler un ID
+      const response = await post<{
+        token: string;
+        id_officier: number;
+      }>("officier/create", {
         ...values,
-      };
-
-      setOfficers([...officers, newOfficer]); // Mettre à jour l'état local
-      toast({ title: 'Officier créé avec succès' });
-      officerForm.reset();
+        nom: values.nom,
+        prenom: values.prenom,
+        email: values.email,
+        telephone: values.phone,
+        password: values.password,
+        id_commune: parseInt(values.id_commune),
+      });
+      if (!response.error) {
+        toast({ title: "Officier créé avec succès" });
+        officerForm.reset();
+        localStorage.setItem("officierToken", response.data.token);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur de création",
+          description: response.message || response.error,
+        });
+      }
     } catch (error: any) {
       toast({
-        variant: 'destructive',
-        title: 'Erreur de création',
-        description: error.message || "Une erreur s'est produite lors de la création de l'officier.",
+        variant: "destructive",
+        title: "Erreur de création",
+        description:
+          error.message ||
+          "Une erreur s'est produite lors de la création de l'officier.",
       });
     }
   };
@@ -337,41 +409,53 @@ export default function AdminDashboard() {
     try {
       // Simuler l'appel API pour valider un admin
       setPendingAdmins(pendingAdmins.filter((a) => a.id !== adminId)); // Mettre à jour l'état local
-      toast({ title: 'Admin validé avec succès' });
+      toast({ title: "Admin validé avec succès" });
     } catch (error: any) {
       toast({
-        variant: 'destructive',
-        title: 'Erreur de validation',
-        description: error.message || "Une erreur s'est produite lors de la validation de l'admin.",
+        variant: "destructive",
+        title: "Erreur de validation",
+        description:
+          error.message ||
+          "Une erreur s'est produite lors de la validation de l'admin.",
       });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <div className=" bg-green-500">
+        <div className="flex h-[80px] max-container items-center">
+          <div className="flex flex-row gap-1 text-green-950 items-baseline w-fit">
+            <Link to="/">
+              <img src={logoImg} alt="Logo image" className="w-8" />
+            </Link>
+            <span className="text-2xl font-bold block">Maryme</span>
+          </div>
+        </div>
+      </div>
       <div className="flex">
         {/* Sidebar */}
         <nav className="w-64 bg-white h-screen p-4 shadow">
           <h2 className="text-xl font-bold mb-6">Tableau de bord Admin</h2>
           <div className="space-y-2">
             <Button
-              variant={activeTab === 'communes' ? 'default' : 'ghost'}
+              variant={activeTab === "communes" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('communes')}
+              onClick={() => setActiveTab("communes")}
             >
               Gestion des communes
             </Button>
             <Button
-              variant={activeTab === 'officiers' ? 'default' : 'ghost'}
+              variant={activeTab === "officiers" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('officiers')}
+              onClick={() => setActiveTab("officiers")}
             >
               Comptes officiers
             </Button>
             <Button
-              variant={activeTab === 'validations' ? 'default' : 'ghost'}
+              variant={activeTab === "validations" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('validations')}
+              onClick={() => setActiveTab("validations")}
             >
               Validation admins
             </Button>
@@ -379,22 +463,30 @@ export default function AdminDashboard() {
         </nav>
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
-          {activeTab === 'communes' && (
+        <main className="flex-1 p-8 max-w-6xl">
+          {activeTab === "communes" && (
             <Card>
               <CardHeader>
                 <CardTitle>Création de commune</CardTitle>
               </CardHeader>
               <CardContent>
                 <Form {...communeForm}>
-                  <form onSubmit={communeForm.handleSubmit(handleCreateCommune)} className="space-y-4">
+                  <form
+                    onSubmit={communeForm.handleSubmit(handleCreateCommune)}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={communeForm.control}
                       name="id_region"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Région <span className="text-red-500">*</span></FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>
+                            Région <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Sélectionner une région" />
@@ -402,10 +494,15 @@ export default function AdminDashboard() {
                             </FormControl>
                             <SelectContent>
                               {loading ? (
-                                <SelectItem value="load" disabled>Chargement...</SelectItem>
+                                <SelectItem value="load" disabled>
+                                  Chargement...
+                                </SelectItem>
                               ) : (
                                 regions.map((region) => (
-                                  <SelectItem key={region.id_region} value={region.id_region.toString()}>
+                                  <SelectItem
+                                    key={region.id_region}
+                                    value={region.id_region.toString()}
+                                  >
                                     {region.nom}
                                   </SelectItem>
                                 ))
@@ -422,8 +519,13 @@ export default function AdminDashboard() {
                       name="id_departement"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Département <span className="text-red-500">*</span></FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>
+                            Département <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Sélectionner un département" />
@@ -431,10 +533,15 @@ export default function AdminDashboard() {
                             </FormControl>
                             <SelectContent>
                               {loading ? (
-                                <SelectItem value="load" disabled>Chargement...</SelectItem>
+                                <SelectItem value="load" disabled>
+                                  Chargement...
+                                </SelectItem>
                               ) : (
                                 departements.map((departement) => (
-                                  <SelectItem key={departement.id_departement} value={departement.id_departement.toString()}>
+                                  <SelectItem
+                                    key={departement.id_departement}
+                                    value={departement.id_departement.toString()}
+                                  >
                                     {departement.nom}
                                   </SelectItem>
                                 ))
@@ -451,9 +558,15 @@ export default function AdminDashboard() {
                       name="nom_commune"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nom de la commune <span className="text-red-500">*</span></FormLabel>
+                          <FormLabel>
+                            Nom de la commune{" "}
+                            <span className="text-red-500">*</span>
+                          </FormLabel>
                           <FormControl>
-                            <Input placeholder="Entrer le nom de la commune" {...field} />
+                            <Input
+                              placeholder="Entrer le nom de la commune"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -461,7 +574,7 @@ export default function AdminDashboard() {
                     />
 
                     <Button type="submit" disabled={loading}>
-                      {loading ? 'Chargement...' : 'Créer la commune'}
+                      {loading ? "Chargement..." : "Créer la commune"}
                     </Button>
                   </form>
                 </Form>
@@ -469,28 +582,43 @@ export default function AdminDashboard() {
             </Card>
           )}
 
-          {activeTab === 'officiers' && (
+          {activeTab === "officiers" && (
             <Card>
               <CardHeader>
                 <CardTitle>Création d'officier d'état civil</CardTitle>
               </CardHeader>
               <CardContent>
                 <Form {...officerForm}>
-                  <form onSubmit={officerForm.handleSubmit(handleCreateOfficer)} className="space-y-4">
+                  <form
+                    onSubmit={officerForm.handleSubmit(handleCreateOfficer)}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={officerForm.control}
-                      name="fullName"
+                      name="nom"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nom complet</FormLabel>
+                          <FormLabel>Nom</FormLabel>
                           <FormControl>
-                            <Input placeholder="Nom complet" {...field} />
+                            <Input placeholder="Nom" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
+                    <FormField
+                      control={officerForm.control}
+                      name="prenom"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prenom</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Prenom" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={officerForm.control}
                       name="email"
@@ -537,8 +665,13 @@ export default function AdminDashboard() {
                       name="id_region"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Région <span className="text-red-500">*</span></FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>
+                            Région <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Sélectionner une région" />
@@ -546,10 +679,15 @@ export default function AdminDashboard() {
                             </FormControl>
                             <SelectContent>
                               {loading ? (
-                                <SelectItem value="" disabled>Chargement...</SelectItem>
+                                <SelectItem value="load" disabled>
+                                  Chargement...
+                                </SelectItem>
                               ) : (
                                 regions.map((region) => (
-                                  <SelectItem key={region.id_region} value={region.id_region.toString()}>
+                                  <SelectItem
+                                    key={region.id_region}
+                                    value={region.id_region.toString()}
+                                  >
                                     {region.nom}
                                   </SelectItem>
                                 ))
@@ -566,8 +704,13 @@ export default function AdminDashboard() {
                       name="id_departement"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Département <span className="text-red-500">*</span></FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>
+                            Département <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Sélectionner un département" />
@@ -575,10 +718,15 @@ export default function AdminDashboard() {
                             </FormControl>
                             <SelectContent>
                               {loading ? (
-                                <SelectItem value="" disabled>Chargement...</SelectItem>
+                                <SelectItem value="load" disabled>
+                                  Chargement...
+                                </SelectItem>
                               ) : (
                                 departements.map((departement) => (
-                                  <SelectItem key={departement.id_departement} value={departement.id_departement.toString()}>
+                                  <SelectItem
+                                    key={departement.id_departement}
+                                    value={departement.id_departement.toString()}
+                                  >
                                     {departement.nom}
                                   </SelectItem>
                                 ))
@@ -595,8 +743,13 @@ export default function AdminDashboard() {
                       name="id_commune"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Commune <span className="text-red-500">*</span></FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>
+                            Commune <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Sélectionner une commune" />
@@ -604,10 +757,15 @@ export default function AdminDashboard() {
                             </FormControl>
                             <SelectContent>
                               {loading ? (
-                                <SelectItem value="" disabled>Chargement...</SelectItem>
+                                <SelectItem value="load" disabled>
+                                  Chargement...
+                                </SelectItem>
                               ) : (
                                 communes.map((commune) => (
-                                  <SelectItem key={commune.id_commune} value={commune.id_commune.toString()}>
+                                  <SelectItem
+                                    key={commune.id_commune}
+                                    value={commune.id_commune.toString()}
+                                  >
                                     {commune.nom}
                                   </SelectItem>
                                 ))
@@ -620,7 +778,7 @@ export default function AdminDashboard() {
                     />
 
                     <Button type="submit" disabled={loading}>
-                      {loading ? 'Chargement...' : 'Créer le compte'}
+                      {loading ? "Chargement..." : "Créer le compte"}
                     </Button>
                   </form>
                 </Form>
@@ -628,7 +786,7 @@ export default function AdminDashboard() {
             </Card>
           )}
 
-          {activeTab === 'validations' && (
+          {activeTab === "validations" && (
             <Card>
               <CardHeader>
                 <CardTitle>Validation des comptes admin</CardTitle>
@@ -654,10 +812,14 @@ export default function AdminDashboard() {
                             onClick={() => handleValidateAdmin(admin.id)}
                             disabled={loading}
                           >
-                            {loading ? 'Chargement...' : 'Valider'}
+                            {loading ? "Chargement..." : "Valider"}
                           </Button>
-                          <Button variant="destructive" size="sm" disabled={loading}>
-                            {loading ? 'Chargement...' : 'Rejeter'}
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={loading}
+                          >
+                            {loading ? "Chargement..." : "Rejeter"}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -672,4 +834,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

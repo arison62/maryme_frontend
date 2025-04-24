@@ -51,13 +51,15 @@ const dossiers = [
 
 function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const windowPosition = useWindowPosition()
+  const windowPosition = useWindowPosition();
   return (
     <div className="h-screen relative scroll-smooth">
-      <div className={`fixed w-full border-b 
+      <div
+        className={`fixed w-full border-b 
         border-slate-200 shadow-sm flex 
         justify-between items-center
-         h-[72px] px-4 z-20 ${windowPosition > 400 ? "bg-white" : ""}`}>
+         h-[72px] px-4 z-20 ${windowPosition > 400 ? "bg-white" : ""}`}
+      >
         <div className="flex flex-row gap-1 text-green-700 items-baseline w-fit">
           <Link to="/">
             <img src={logoImg} alt="Logo image" className="w-8" />
@@ -84,12 +86,11 @@ function HomePage() {
             <div
               className={`${
                 isMenuOpen ? "flex" : "hidden"
-
               } flex-col gap-4 absolute min-w-[300px] top-12 right-0 bg-white p-4 rounded-md shadow-lg`}
-
             >
               <span>Informations Generales</span>
               <Link to="/login">Se connecter</Link>
+              <Link to="/officier/login">Officier</Link>
               <Button>
                 <Link to="/declaration">Declarer un Mariage</Link>
               </Button>
@@ -103,12 +104,12 @@ function HomePage() {
                 </NavigationMenuTrigger>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                
-                  <Link to="/login">Se connecter</Link>
-                
+                <Link to="/officier/login">Officier</Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-               
+                <Link to="/login">Se connecter</Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
                 <Button>
                   <Link to="/declaration">Declarer un Mariage</Link>
                 </Button>
@@ -124,7 +125,9 @@ function HomePage() {
         </p>
       </div>
       <div className="max-container mt-12">
-        <h2 className="text-2xl font-semibold mb-4 text-center">Constitution du dossier physique</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-center">
+          Constitution du dossier physique
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:grid-cols-3">
           {dossiers.map((dossier, idx) => (
             <Card key={idx} className="h-fit">
@@ -151,9 +154,7 @@ function HomePage() {
           ))}
         </div>
       </div>
-      <div className="h-[600px] bg-green-600 mt-24">
-
-      </div>
+      <div className="h-[600px] bg-green-600 mt-24"></div>
     </div>
   );
 }

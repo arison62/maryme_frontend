@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,6 +35,7 @@ const signupSchema = baseSchema.extend({
 export default function AuthPage() {
   const { toast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof baseSchema | typeof signupSchema>>({
     resolver: zodResolver(isLogin ? baseSchema : signupSchema),
@@ -65,6 +67,7 @@ export default function AuthPage() {
         });
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("isAdmin", "true");
+        navigate('/admin');
       }
     } catch (error) {
       toast({

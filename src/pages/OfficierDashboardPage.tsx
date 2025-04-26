@@ -159,7 +159,7 @@ const OfficerDashboard = () => {
       confirmPassword: "",
     },
   });
-
+ 
   // Fonction pour récupérer les déclarations
   const fetchDeclarations = useCallback(async () => {
     setLoading(true);

@@ -5,6 +5,7 @@ import AuthPage from "./pages/AuthPage"
 import AdminDashboard from "./pages/AdminDasboardPage"
 import LoginPage from "./pages/OfficierLoginPage"
 import OfficerDashboard from "./pages/OfficierDashboardPage"
+import BancPublication from "./pages/BancPublication"
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/banc" element={<BancPublication />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/admin" element={<AdminDashboard  />} />
         <Route path="/officier/login" element={<LoginPage />} />

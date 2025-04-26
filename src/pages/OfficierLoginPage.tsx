@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router";
 import logoImg from "../assets/logo.png";
 import { post } from "@/api/client";
-
+ 
 
 // Schéma de validation pour le formulaire de connexion
 const loginSchema = z.object({

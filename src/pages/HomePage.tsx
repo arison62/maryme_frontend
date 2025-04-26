@@ -7,7 +7,6 @@ import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import {
   Card,
@@ -18,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import useWindowPosition from "@/hooks/use-scrollposition";
+import CommunesAvecSysteme from "@/components/commune_systeme";
 
 const dossiers = [
   {
@@ -99,9 +99,7 @@ function HomePage() {
           <NavigationMenu>
             <NavigationMenuList className="hidden md:flex gap-6 items-baseline">
               <NavigationMenuItem>
-                <NavigationMenuTrigger>
-                  Informations Generales
-                </NavigationMenuTrigger>
+                <Link to="/banc">Banc publications</Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/officier/login">Officier</Link>
@@ -153,7 +151,11 @@ function HomePage() {
             </Card>
           ))}
         </div>
+        <div className="mt-8">
+          <CommunesAvecSysteme />
+        </div>
       </div>
+
       <div className="h-[600px] bg-green-600 mt-24"></div>
     </div>
   );

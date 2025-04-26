@@ -93,7 +93,7 @@ function Confirmation({
   }, []);
 
   useEffect(() => {
-    if (!isFirtstRender.current) {
+    if (!isFirtstRender.current && isSent) { // Only run when isSent is true and not on first render
       setIsProgess(true);
       async function setDeclaration() {
         console.log("Set declaration");
@@ -137,7 +137,7 @@ function Confirmation({
           });
         }
         setIsProgess(false);
-        setIsSent(false);
+        setIsSent(false); // Reset isSent after the operation is complete
       }
       setDeclaration();
     } else {

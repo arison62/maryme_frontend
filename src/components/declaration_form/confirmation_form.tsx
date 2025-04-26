@@ -8,9 +8,8 @@ import {
   DeclarationMariageContext,
   DeclarationTemoinContext,
 } from "./declaration_provider";
-import { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-
 import {
   Form,
   FormControl,
@@ -72,8 +71,9 @@ function Confirmation({
   const isFirtstRender = useRef(true);
   const [id_declaration, setIdDeclaration] = useState<number | null>(null);
   const [isSent, setIsSent] = useState(false);
-  const {toast} = useToast();
+  const { toast } = useToast();
   const pdfDeclaration = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setIsProgess(true);
     async function getData() {
@@ -125,27 +125,26 @@ function Confirmation({
           console.log(data);
           setIdDeclaration(data.data.id);
           toast({
-            title: "Déclaration envoyée",
-            description: "Votre déclaration a été envoyée avec succès",
-          })
+            title: "Déclaration envoyée",
+            description: "Votre déclaration a été envoyée avec succès",
+          });
         } else {
           console.log(data.message);
           toast({
             variant: "destructive",
-            title: "Déclaration non envoyée",
+            title: "Déclaration non envoyée",
             description: data.message,
-          })
+          });
         }
         setIsProgess(false);
         setIsSent(false);
       }
       setDeclaration();
-    }else{
+    } else {
       isFirtstRender.current = false;
     }
     console.log("isFirtstRender", isFirtstRender);
-   
-  }, [isSent]);
+  }, [isSent, celebrant, temoins, mariage.id_commune, mariage.date_mariage, epoux, epouse, toast]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -155,36 +154,41 @@ function Confirmation({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    console.log("onSubmit values", values);
+    // Update mariage context here, since the form submission is the final step.
+    setMariage({
+      ...mariage,
+      id_commune: parseInt(values.id_commune),
+      // nom_commune is already set in the onChange handler, no need to set it here.
+    });
+    setIsSent(true); // Trigger the submission to the backend.
   }
 
-  function onChange(event: FormEvent<HTMLFormElement>) {
-    const formData = new FormData(event.currentTarget);
-    const id_region = formData.get("id_region") as string;
-    const id_departement = formData.get("id_departement") as string;
-    const id_commune = formData.get("id_commune") as string;
+  const handleRegionChange = (value: string) => {
+    const region = regions.find((r) => r.id_region.toString() === value);
+    setDepartements(region?.Departements || []);
+    setCommunes([]); // Clear communes when region changes
+    form.setValue("id_region", value);
+    form.setValue("id_departement", "0");  // Reset
+    form.setValue("id_commune", "0");    // Reset
+  };
 
-    console.log("onchange : ", id_region, id_departement, id_commune);
-    const departement = regions.find(
-      (region) => region.id_region == parseInt(id_region)
-    )?.Departements;
-    console.log(departement);
-    const communes = departement?.find(
-      (departement) => departement.id_departement == parseInt(id_departement)
-    )?.Communes;
-    setDepartements(departement ?? []);
-    setCommunes(communes ?? []);
-    if (id_commune) {
-      console.log("onchange : ", id_region, id_departement, id_commune);
-      setMariage({
-        ...mariage,
-        nom_commune: communes?.find(
-          (commune) => commune.id_commune == parseInt(id_commune)
-        )?.nom,
-        id_commune: parseInt(id_commune),
-      });
-    }
-  }
+  const handleDepartementChange = (value: string) => {
+    const departement = departements.find((d) => d.id_departement.toString() === value);
+    setCommunes(departement?.Communes || []);
+    form.setValue("id_departement", value);
+    form.setValue("id_commune", "0"); // Reset
+  };
+
+  const handleCommuneChange = (value: string) => {
+    const commune = communes.find((c) => c.id_commune.toString() === value);
+    setMariage({
+      ...mariage,
+      nom_commune: commune?.nom || '',
+      id_commune: parseInt(value),
+    });
+    form.setValue("id_commune", value);
+  };
 
   return (
     <div className={clsx("w-full mb-4", className)}>
@@ -192,7 +196,6 @@ function Confirmation({
         <form
           className="flex gap-8 flex-col"
           onSubmit={form.handleSubmit(onSubmit)}
-          onChange={onChange}
         >
           <div>
             <h2 className="text-xl font-bold text-green-800 mb-4">
@@ -205,7 +208,7 @@ function Confirmation({
                 render={({ field }) => (
                   <FormItem className="w-full max-w-sm pb-4 flex flex-col">
                     <FormLabel>Region</FormLabel>
-                    <Select onValueChange={field.onChange} name={field.name}>
+                    <Select onValueChange={handleRegionChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-[280px] border border-gray-300 rounded-md">
                           <SelectValue placeholder="Choisissez votre region" />
@@ -232,7 +235,7 @@ function Confirmation({
                 render={({ field }) => (
                   <FormItem className="w-full max-w-sm pb-4 flex flex-col">
                     <FormLabel>Departement</FormLabel>
-                    <Select name={field.name}>
+                    <Select onValueChange={handleDepartementChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-[280px] border border-gray-300 rounded-md">
                           <SelectValue placeholder="Choisissez votre departement" />
@@ -259,7 +262,7 @@ function Confirmation({
                 render={({ field }) => (
                   <FormItem className="w-full max-w-sm pb-4 flex flex-col">
                     <FormLabel>Commune</FormLabel>
-                    <Select name={field.name}>
+                    <Select onValueChange={handleCommuneChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-[280px] border border-gray-300 rounded-md">
                           <SelectValue placeholder="Choisissez votre commune" />
@@ -282,9 +285,8 @@ function Confirmation({
               ></FormField>
             </div>
           </div>
-          <MarriageCard idDeclaration={id_declaration} ref={pdfDeclaration}/>
+          <MarriageCard idDeclaration={id_declaration} ref={pdfDeclaration} />
           <div className="flex justify-between max-w-4xl">
-
             <Button
               variant={"outline"}
               onClick={() => {
@@ -293,29 +295,25 @@ function Confirmation({
             >
               Precedent
             </Button>
-            {
-              id_declaration == null ? (
-                <Button
-                  type="submit"
-                  disabled={isProgress}
-                  onClick={() => {
-                    setIsSent(true);
-                  }}
-                >
-                  {isProgress && <CircularProgressIndicator />}
-                  Enregister
-                </Button>
-              ):(
-                <Button
-                  onClick={
-                    ()=> generatePDF(pdfDeclaration, {filename: `declaration-${id_declaration}.pdf`})
-                  }
-                >
-                  Telecharger
-                </Button>
-              )
-            }
-          
+            {id_declaration == null ? (
+              <Button
+                type="submit"
+                disabled={isProgress}
+              >
+                {isProgress && <CircularProgressIndicator />}
+                Enregister
+              </Button>
+            ) : (
+              <Button
+                onClick={() =>
+                  generatePDF(pdfDeclaration, {
+                    filename: `declaration-${id_declaration}.pdf`,
+                  })
+                }
+              >
+                Telecharger
+              </Button>
+            )}
           </div>
         </form>
       </Form>
@@ -324,3 +322,4 @@ function Confirmation({
 }
 
 export default Confirmation;
+

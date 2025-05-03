@@ -65,10 +65,11 @@ export default function AuthPage() {
           title: `${isLogin ? "Connexion" : "Création"} réussie`,
           description: response.message,
         });
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("isAdmin", "true");
+        
         if (isLogin) {
           navigate("/admin");
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("isAdmin", "true");
         }
       }
     } catch (error) {

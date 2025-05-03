@@ -67,7 +67,9 @@ export default function AuthPage() {
         });
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("isAdmin", "true");
-        navigate('/admin');
+        if (isLogin) {
+          navigate("/admin");
+        }
       }
     } catch (error) {
       toast({
